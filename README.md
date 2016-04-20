@@ -23,9 +23,9 @@ After cloning the project from GitHub into a local directory, run:
 
         mvn package
 
-To run the server with 4GB heap, run:
+To run the server with 6GB heap, run:
 
-        java -Xmx4G -jar target/primordial-1.0-SNAPSHOT.jar server primordial.yml
+        java -Xmx6G -jar target/primordial-1.0-SNAPSHOT.jar server primordial.yml
 
 Note we have been able to generate primes up to 2 billion using the ParallelSegmentedEratosthenesSieve implementation
 and 6GB of heap.  A heap of 2GB or 4GB is fine for smaller ranges.
@@ -60,10 +60,11 @@ To easily compare the performance of the three algorithms, you can run:
 You can paste the JSON into this [JSON Viewer](http://jsonviewer.stack.hu/) for ease of use.
 
 Note that the BasicTrialDivision algorithm is extremely slow.  For this reason it is not recommended to use
-the `/performance` URL for ceiling values > 1,000,000.  You can however, try the other two algorithms with
-much larger values, and the JSON response for the /primes path will include the time spent in the calculation.
+the `/performance` URL for ceiling values higher than 5 or 10 million.  You can however, try the other two
+algorithms with much larger values, using the calculatorType parameter.  The JSON response always includes
+the time spent in the calculation.
 
-If you start the server with 6GB, you should be able to run this query in approximately 26 seconds
+If you start the server with 6GB, you should be able to run this query in approximately 20 to 25 seconds
 (tested on an 8-core Intel Xeon CPU, 3.2 GHz)
 
         http://localhost:8080/primes?calculatorType=ParallelSegmentedEratosthenesSieve&ceiling=1000000000&keepLast=1
