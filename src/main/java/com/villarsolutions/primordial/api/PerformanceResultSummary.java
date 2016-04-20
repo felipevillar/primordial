@@ -6,12 +6,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public class PerformanceResultSummary {
 
-    private BigInteger ceiling;
+    private long ceiling;
     private int countOfPrimes;
 
     private List<PerformanceResult> results = Lists.newArrayList();
@@ -20,14 +19,14 @@ public class PerformanceResultSummary {
         // Jackson deserialization
     }
 
-    public PerformanceResultSummary(BigInteger ceiling, int countOfPrimes, List<PerformanceResult> results) {
+    public PerformanceResultSummary(long ceiling, int countOfPrimes, List<PerformanceResult> results) {
         this.ceiling = ceiling;
         this.countOfPrimes = countOfPrimes;
         this.results = results;
     }
 
     @JsonProperty
-    public BigInteger getCeiling() {
+    public long getCeiling() {
         return ceiling;
     }
 

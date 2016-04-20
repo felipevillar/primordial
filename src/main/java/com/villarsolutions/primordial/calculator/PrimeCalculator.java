@@ -3,7 +3,6 @@ package com.villarsolutions.primordial.calculator;
 
 import com.villarsolutions.primordial.exception.CalculationException;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public interface PrimeCalculator {
@@ -14,6 +13,6 @@ public interface PrimeCalculator {
      * Note that <code>ceiling</code> is inclusive, i.e. the returned list will
      * include the ceiling if it is a prime number.
      */
-    List<BigInteger> calculatePrimes(BigInteger ceiling) throws CalculationException;
+    List<Long> calculatePrimes(long ceiling) throws CalculationException;
 
 }

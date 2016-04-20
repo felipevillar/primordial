@@ -9,8 +9,11 @@ The service is able to generate prime numbers up to a specified 'ceiling', and i
 implementations for comparison.  The implementations can be queried independently without having to rebuild
 the service, by using the 'calculatorType' parameter (more on this below).
 
-The ParallelSegmentedEratosthenesSieve implementation is an example using Java 8 streams to
-multi-thread a prime number generator.
+The "ParallelSegmentedEratosthenesSieve" implementation is an example using Java 8 streams to
+multi-thread a prime number generator.  After calculating the "small" prime numbers using a single-threaded
+"Sieve of Eratosthenes" algorithm, it divides the rest of the number-line into "segments" and uses all
+available cores on the machine to "sieve" these segments in parallel.   This results in much faster results,
+e.g. 1 minute instead of 4 minutes to search for all prime numbers up to 2 billion.
 
 # Building and Running
 
@@ -24,8 +27,8 @@ To run the server with 4GB heap, run:
 
         java -Xmx4G -jar target/primordial-1.0-SNAPSHOT.jar server primordial.yml
 
-Note we have been able to generate primes up to 1 billion using the ParallelSegmentedEratosthenesSieve implementation
-and 8GB of heap.  A heap of 4GB is fine for smaller ranges.
+Note we have been able to generate primes up to 2 billion using the ParallelSegmentedEratosthenesSieve implementation
+and 6GB of heap.  A heap of 2GB or 4GB is fine for smaller ranges.
 
 To generate all primes up to 30 using the default calculator, run:
 
@@ -60,8 +63,8 @@ Note that the BasicTrialDivision algorithm is extremely slow.  For this reason i
 the `/performance` URL for ceiling values > 1,000,000.  You can however, try the other two algorithms with
 much larger values, and the JSON response for the /primes path will include the time spent in the calculation.
 
-If you start the server with 8GB (5GB should be sufficient but I've tested it with 8GB), you should be
-able to run this query in around 1.5 minutes (tested on an 8-core Intel Xeon CPU, 3.2 GHz)
+If you start the server with 6GB, you should be able to run this query in approximately 26 seconds
+(tested on an 8-core Intel Xeon CPU, 3.2 GHz)
 
         http://localhost:8080/primes?calculatorType=ParallelSegmentedEratosthenesSieve&ceiling=1000000000&keepLast=1
 

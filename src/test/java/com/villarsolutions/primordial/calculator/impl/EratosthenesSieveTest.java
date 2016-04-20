@@ -6,7 +6,6 @@ import com.villarsolutions.primordial.exception.CalculationException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.villarsolutions.primordial.util.PrimordialUtil.bigInt;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -29,8 +28,8 @@ public class EratosthenesSieveTest extends AbstractPrimeCalculatorTest {
     @Test
     public void whenCeilingIsAboveIntegerMaxValue_thenCalculationExceptionIsThrown() throws Exception {
         exception.expect(CalculationException.class);
-        exception.expectMessage("This calculator only supports prime numbers less than [");
-        assertThat(getCalculator().calculatePrimes(bigInt(Integer.MAX_VALUE - 8)));
+        exception.expectMessage("This calculator only supports prime numbers up to [");
+        assertThat(getCalculator().calculatePrimes((long) Integer.MAX_VALUE + 1));
     }
 
 }

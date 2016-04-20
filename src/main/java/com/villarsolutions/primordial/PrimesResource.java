@@ -17,14 +17,12 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.villarsolutions.primordial.util.PrimordialUtil.getDecimalFormat;
-import static java.math.BigInteger.ONE;
 
 /**
  * This is the main DropWizard Resource class for the Primordial application.
@@ -65,7 +63,7 @@ public class PrimesResource {
 
     @GET
     @Timed
-    public Response calculatePrime(@QueryParam(CALCULATOR_TYPE_PARAMETER) String calculatorType, @QueryParam(CEILING_PARAMETER) BigInteger ceiling, @QueryParam(KEEP_LAST_PARAMETER) Integer keepLast) {
+    public Response calculatePrime(@QueryParam(CALCULATOR_TYPE_PARAMETER) String calculatorType, @QueryParam(CEILING_PARAMETER) Long ceiling, @QueryParam(KEEP_LAST_PARAMETER) Integer keepLast) {
         checkParameter(CEILING_PARAMETER, ceiling);
         PrimeCalculator calculator = calculatorType == null ? defaultCalculator : getCalculatorBean(calculatorType).orElseThrow(() -> new BadRequestException(noCalculatorMessage(calculatorType)));
         return calculatePrime(calculator, ceiling, keepLast);
@@ -74,7 +72,7 @@ public class PrimesResource {
     @GET
     @Path("/performance")
     @Timed
-    public Response performanceRun(@QueryParam(CEILING_PARAMETER) BigInteger ceiling) {
+    public Response performanceRun(@QueryParam(CEILING_PARAMETER) Long ceiling) {
         checkParameter(CEILING_PARAMETER, ceiling);
         validateCeiling(ceiling);
 
@@ -103,7 +101,7 @@ public class PrimesResource {
         }
     }
 
-    private Response calculatePrime(PrimeCalculator calculator, BigInteger ceiling, Integer keepLast) {
+    private Response calculatePrime(PrimeCalculator calculator, long ceiling, Integer keepLast) {
         validateCeiling(ceiling);
         validateKeepLast(keepLast);
 
@@ -117,9 +115,9 @@ public class PrimesResource {
         }
     }
 
-    private CalculationResult getCalculationResult(PrimeCalculator calculator, BigInteger ceiling, Integer keepLast) throws CalculationException {
+    private CalculationResult getCalculationResult(PrimeCalculator calculator, long ceiling, Integer keepLast) throws CalculationException {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        List<BigInteger> primes = calculator.calculatePrimes(ceiling);
+        List<Long> primes = calculator.calculatePrimes(ceiling);
 
         int countOfPrimes = primes.size();
 
@@ -150,8 +148,8 @@ public class PrimesResource {
         return String.format("There is no configured calculator with name [%s]", defaultCalculator);
     }
 
-    private static void validateCeiling(BigInteger ceiling) {
-        if (ceiling.compareTo(ONE) <= 0) {
+    private static void validateCeiling(long ceiling) {
+        if (ceiling <= 1) {
             throw new BadRequestException("The 'ceiling' must be greater than 1");
         }
     }

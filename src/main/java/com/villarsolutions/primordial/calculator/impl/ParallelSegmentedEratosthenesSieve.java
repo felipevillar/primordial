@@ -1,16 +1,18 @@
 package com.villarsolutions.primordial.calculator.impl;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.villarsolutions.primordial.calculator.AbstractPrimeCalculator;
 import com.villarsolutions.primordial.exception.CalculationException;
-import com.villarsolutions.primordial.util.PrimordialUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -25,30 +27,40 @@ import java.util.stream.Stream;
  * Eratosthenes Sieve.  The rest of the number range is the split into segments,
  * and each segment is then processed in parallel using an array sieve.
  * <p>
- * In comparison to the single-threaded Eratosthenes Sieve (which has a limit of MAX_ARRAY_LENGTH),
+ * In comparison to the single-threaded Eratosthenes Sieve (which has a limit of <code>Integer.MAX_VALUE</code>),
  * this calculator is able to find much larger primes, up to (MAX_ARRAY_LENGTH ^ 2) - as long as there is enough
  * heap allocated to the process.
+ * <p>
+ * Since the multi-threading is done with a parallel stream which uses a default ForkJoinPool,
+ * the actual number of threads used will default to the number of CPU cores.
+ * Therefore the heap footprint will be a function of the available cores.
  *
- * @see PrimordialUtil#MAX_ARRAY_LENGTH
+ * @see Integer#MAX_VALUE
+ * @see Runtime#availableProcessors()
+ * @see java.util.concurrent.ForkJoinPool
  */
 public class ParallelSegmentedEratosthenesSieve extends AbstractPrimeCalculator {
 
+    private static final Logger log = LoggerFactory.getLogger(AbstractPrimeCalculator.class);
+
     @Override
-    protected List<BigInteger> calculate(BigInteger ceiling) throws CalculationException {
-        // Note it is safe to convert ceiling to a long, because we limit the range of the ceiling
-        // using the getMaxCeilingSupported() method. For the same reason, it safe to cast the
-        // square root of ceiling to an int.
+    protected List<Long> calculate(long ceiling) throws CalculationException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        // Note: It safe to cast the square root of ceiling to an int because we limit the
+        // range of the ceiling using the getMaxCeilingSupported() method.
         // The range of 'ceiling' is validated in the superclass so no need to check it again here.
-        long ceilingL = ceiling.longValue();
-        int segmentSize = (int) Math.sqrt(ceilingL);
+        int segmentSize = (int) Math.sqrt(ceiling);
 
         // Find the primes in the first segment.  Note that the range we are segmenting
         // is from 2 to ceiling, so the first segment spans the numbers from 2 to "segmentSize + 1"
-        List<Integer> smallPrimes = EratosthenesSieve.findPrimes(segmentSize + 1);
+        ImmutableList<Integer> smallPrimes = EratosthenesSieve.findPrimes(segmentSize + 1);
+        log.debug(String.format("Found [%d] small primes from 2 to [%d]. Time elapsed = %s",
+                smallPrimes.size(), segmentSize + 1, stopwatch));
 
         // Now set up the remaining segments.
         List<Segment> segments = Lists.newArrayList();
-        long numberOfSegments = getNumberOfSegments(ceilingL, segmentSize);
+        long numberOfSegments = getNumberOfSegments(ceiling, segmentSize);
 
         // The segmentNumbers start at 0, and we can skip the first segment.
         for (long segmentNumber = 1; segmentNumber < (numberOfSegments - 1); segmentNumber++) {
@@ -58,41 +70,50 @@ public class ParallelSegmentedEratosthenesSieve extends AbstractPrimeCalculator 
 
         // Now the final segment
         long lowerBound = (numberOfSegments-1) * segmentSize + 2;
-        int finalSegmentSize = getFinalSegmentSize(ceilingL, segmentSize);
+        int finalSegmentSize = getFinalSegmentSize(ceiling, segmentSize);
         segments.add(new Segment(lowerBound, finalSegmentSize));
 
-        List<Long> biggerPrimes =
+        log.debug(String.format("Created [%d] segments of size [%d] and a final segment of size [%d]. Time elapsed = %s",
+                segments.size(), segmentSize, finalSegmentSize, stopwatch));
+
+        // Concatenate the smaller primes with the rest of the primes in the number line.
+        // The bigger primes are calculated in parallel using a parallelStream.
+        // Each thread in the fork/join pool is given a segment to work on independently.
+        // The flatMap operation combines the results of the parallel work into
+        // a single stream, so that it can then be concatenated with the stream of small primes.
+        List<Long> result = Stream.concat(
+                smallPrimes.stream().mapToLong(i -> (long) i).boxed(),
                 segments.parallelStream()
-                .map(s -> calculatePrimesInSegment(smallPrimes, s))
-                .flatMap(Collection::stream)
+                        .map(s -> calculatePrimesInSegment(smallPrimes, s))
+                        .flatMap(Collection::stream))
                 .collect(Collectors.toList());
 
-        // Concatenate the smaller primes with the rest of the primes found in the segments.
-        return Stream.concat(
-                smallPrimes.stream().map(BigInteger::valueOf),
-                biggerPrimes.stream().map(BigInteger::valueOf))
-                .collect(Collectors.toList());
+        log.debug(String.format("Calculation completed. Found [%d] primes overall. Time elapsed = %s", result.size(), stopwatch));
+        return result;
     }
 
-    private List<Long> calculatePrimesInSegment(List<Integer> smallPrimes, Segment segment) {
+    private List<Long> calculatePrimesInSegment(ImmutableList<Integer> smallPrimes, Segment segment) {
         // false means the number is prime.  This is the same convention
         // that was used in the basic EratosthenesSieve
-        boolean[] sieve = new boolean[segment.getSegmentSize()];
+        BitSet sieve = new BitSet(segment.getSegmentSize());
+        int sieveLength = segment.getSegmentSize();
         long lowerBound = segment.getLowerBound();
 
+        // For each small prime 'p', eliminate the multiples of p from the sieve
         smallPrimes.forEach(p -> {
-            // Eliminate the multiples of p from the sieve
+            // This a safe-cast to int because p is an int, so the % operation
+            // yields a remainder that is < Integer.MAX_VALUE
             int remainder = (int) (lowerBound % p);
             int startIndex = remainder == 0 ? 0 : (p - remainder);
 
-            for (int index = startIndex; index < sieve.length; index += p) {
-                sieve[index] = true;
+            for (int index = startIndex; index < sieveLength; index += p) {
+                sieve.set(index);
             }
         });
 
         ImmutableList.Builder<Long> results = ImmutableList.builder();
-        for (int index = 0; index < sieve.length; index++) {
-            if (!sieve[index]) {
+        for (int index = 0; index < sieveLength; index++) {
+            if (!sieve.get(index)) {
                 results.add(lowerBound + index);
             }
         }
@@ -114,21 +135,29 @@ public class ParallelSegmentedEratosthenesSieve extends AbstractPrimeCalculator 
     }
 
     /**
-     * As we are segmenting the range into multiple arrays of size sqrt(n) and
-     * each array cannot be longer than <code>MAX_ARRAY_LENGTH</code>,
-     * then this algorithm can support a ceiling of <code>MAX_ARRAY_LENGTH ^ 2</code>
+     * We are segmenting the range into multiple BitSets of size sqrt(n) and
+     * each BitSet cannot be longer than <code>Integer.MAX_LENGTH</code>.
+     * Thus, this algorithm can support a ceiling of <code>Integer.MAX_LENGTH ^ 2</code>
      * <p>
      * Also refer to EratosthenesSieve.getMaxCeilingSupported()
      *
      * @see EratosthenesSieve#getMaxCeilingSupported()
-     * @see PrimordialUtil#MAX_ARRAY_LENGTH
      */
     @Override
-    protected Optional<BigInteger> getMaxCeilingSupported() {
-        return Optional.of(PrimordialUtil.MAX_ARRAY_LENGTH.pow(2));
+    protected Optional<Long> getMaxCeilingSupported() {
+        return Optional.of((long) Math.pow(Integer.MAX_VALUE, 2));
     }
 
-
+    /**
+     * Represents a section of the number line for which
+     * we wish to compute prime numbers.
+     * <p>
+     * The section starts on the number represented by the
+     * <code>lowerBound</code> field and ends
+     * on the number given by (<code>lowerBound</code> + <code>segmentSize</code>).
+     * <p>
+     * This class is immutable and therefore thread-safe.
+     */
     private static class Segment {
 
         /**

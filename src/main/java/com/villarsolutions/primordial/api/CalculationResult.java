@@ -9,25 +9,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 public class CalculationResult {
 
     private String calculatorType;
-    private BigInteger ceiling;
+    private long ceiling;
     private int countOfPrimes;
     private Integer keepLast;
     private BigDecimal timeElapsedSecs;
     private String timeElapsedDesc;
-    private List<BigInteger> primes;
+    private List<Long> primes;
 
     public CalculationResult() {
         // Jackson deserialization
     }
 
-    private CalculationResult(String calculatorType, BigInteger ceiling, int countOfPrimes, Integer keepLast,
-                              List<BigInteger> primes, BigDecimal timeElapsedSecs, String timeElapsedDesc) {
+    private CalculationResult(String calculatorType, long ceiling, int countOfPrimes, Integer keepLast,
+                              List<Long> primes, BigDecimal timeElapsedSecs, String timeElapsedDesc) {
         this.calculatorType = calculatorType;
         this.ceiling = ceiling;
         this.countOfPrimes = countOfPrimes;
@@ -37,8 +36,8 @@ public class CalculationResult {
         this.timeElapsedDesc = timeElapsedDesc;
     }
 
-    public static CalculationResult create(PrimeCalculator calculator, BigInteger ceiling, int countOfPrimes, Integer keepLast,
-                                           List<BigInteger> primes, BigDecimal timeElapsedSecs, String timeElapsedDesc) {
+    public static CalculationResult create(PrimeCalculator calculator, long ceiling, int countOfPrimes, Integer keepLast,
+                                           List<Long> primes, BigDecimal timeElapsedSecs, String timeElapsedDesc) {
         return new CalculationResult(calculator.getClass().getSimpleName(), ceiling, countOfPrimes, keepLast,
                 primes, timeElapsedSecs, timeElapsedDesc);
     }
@@ -49,7 +48,7 @@ public class CalculationResult {
     }
 
     @JsonProperty
-    public BigInteger getCeiling() {
+    public long getCeiling() {
         return ceiling;
     }
 
@@ -84,7 +83,7 @@ public class CalculationResult {
     }
 
     @JsonProperty
-    public List<BigInteger> getPrimes() {
+    public List<Long> getPrimes() {
         return primes;
     }
 

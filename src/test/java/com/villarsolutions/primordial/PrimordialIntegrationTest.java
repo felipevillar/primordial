@@ -14,12 +14,10 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 import static com.villarsolutions.primordial.PrimesResource.URL_BASE_PATH;
 import static com.villarsolutions.primordial.PrimordialFixtures.createResultFromJson;
-import static com.villarsolutions.primordial.util.PrimordialUtil.bigInt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -70,9 +68,9 @@ public class PrimordialIntegrationTest {
     @Test
     public void whenTheCeilingIsLessThanTwo_thenABadRequestResultIsReturned() throws Exception {
         List<Response> responses = Lists.newArrayList();
-        responses.add(sendRequest(bigInt(1)));
-        responses.add(sendRequest(bigInt(0)));
-        responses.add(sendRequest(bigInt(-1)));
+        responses.add(sendRequest(1));
+        responses.add(sendRequest(0));
+        responses.add(sendRequest(-1));
 
         responses.forEach(r -> {
             assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), r.getStatus());
@@ -83,17 +81,17 @@ public class PrimordialIntegrationTest {
 
     @Test
     public void whenTheCeilingIsOutOfRange_thenAnInternalErrorResultIsReturned() throws Exception {
-        Response response = sendRequest(bigInt(Integer.MAX_VALUE));
+        Response response = sendRequest(Long.MAX_VALUE);
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         String errorText = response.readEntity(String.class);
-        assertThat(errorText).contains("This calculator only supports prime numbers less than [");
+        assertThat(errorText).contains("This calculator only supports prime numbers up to [");
     }
 
-    private Response sendRequest(BigInteger ceiling) {
+    private Response sendRequest(long ceiling) {
         return sendRequest(null, ceiling);
     }
 
-    private Response sendRequest(String calculatorType, BigInteger ceiling) {
+    private Response sendRequest(String calculatorType, long ceiling) {
         WebTarget webTarget = client.target("http://localhost:" + RULE.getLocalPort() + URL_BASE_PATH)
                 .queryParam(PrimesResource.CEILING_PARAMETER, ceiling);
 
