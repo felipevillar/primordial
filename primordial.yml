@@ -1,5 +1,29 @@
 
-defaultCalculator: ParallelSegmentedEratosthenesSieve
+defaultCalculator: ParallelEratosthenesSieve
+
+# This applies to all parallel sieves
+parallelismLowerBound: 19
+
+# AWS Lambda Config
+awsRegion: EU_WEST_1
+awsLevelOfParallelism: 50
+awsMinSegmentSize: 65536
+
+# Note that the default AWS response body
+# limit is 6MB, so need to limit the AWS segment
+# size to avoid hitting this limit.
+# Also see: http://docs.aws.amazon.com/lambda/latest/dg/limits.html
+#
+# The response body size depends on how many primes
+# are found in the segment.  For example, between 600,044,722 and  610,044,722
+# there's 494,749 primes, which corresponds to a JSON response body size of
+# approximately 4.7 MB
+awsMaxSegmentSize:  10000000
+
+# Local Parallel Calculator Config
+localMinSegmentSize: 65536
+localMaxSegmentSize: 2147483647
+
 
 server:
   applicationConnectors:
@@ -16,7 +40,7 @@ logging:
 
   # Logger-specific levels.
   loggers:
-    com.villarsolutions.primordial: DEBUG
+    com.villarsolutions.primordial: INFO
 
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz

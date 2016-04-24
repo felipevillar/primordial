@@ -1,5 +1,17 @@
 defaultCalculator: EratosthenesSieve
 
+parallelismLowerBound: 19
+
+# AWS Lambda Config
+awsRegion: EU_WEST_1
+awsLevelOfParallelism: 1
+awsMinSegmentSize: 65536
+awsMaxSegmentSize: 33554432
+
+# Local Parallel Calculator Config
+localMinSegmentSize: 65536
+localMaxSegmentSize: 2147483647
+
 server:
   applicationConnectors:
     - type: http

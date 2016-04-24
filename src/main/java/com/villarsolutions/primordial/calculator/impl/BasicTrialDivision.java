@@ -15,7 +15,7 @@ import static com.villarsolutions.primordial.util.PrimordialUtil.isEven;
  * search from 2 to sqrt(N) so the time complexity of this algorithm is O( n*sqrt(n) )
  * <p>
  * For a faster and more reasonable implementation refer to <code>EratosthenesSieve</code>
- * or <code>ParallelSegmentedEratosthenesSieve</code>
+ * or <code>ParallelEratosthenesSieve</code>
  */
 public class BasicTrialDivision extends AbstractPrimeCalculator {
 

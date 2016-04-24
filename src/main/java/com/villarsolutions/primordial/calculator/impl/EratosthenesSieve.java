@@ -1,11 +1,8 @@
 package com.villarsolutions.primordial.calculator.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.villarsolutions.primordial.calculator.AbstractPrimeCalculator;
 import com.villarsolutions.primordial.exception.CalculationException;
 
-import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @see Integer#MAX_VALUE
  */
-public class EratosthenesSieve extends AbstractPrimeCalculator {
+public class EratosthenesSieve extends AbstractSieveCalculator {
 
     @Override
     protected List<Long> calculate(long ceiling) throws CalculationException {
@@ -32,49 +29,6 @@ public class EratosthenesSieve extends AbstractPrimeCalculator {
                 .mapToLong(i -> (long) i)
                 .boxed()
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * This method is public and static so that this sieving logic can be reused by other calculators.
-     *
-     * @return an ImmutableList with the prime numbers from 2 to ceiling.
-     */
-    public static ImmutableList<Integer> findPrimes(int ceiling) {
-        if (ceiling < 2) {
-            return ImmutableList.of();
-        }
-
-        // The BitSet sieve contains a bit for each number
-        // from 2 to ceiling. If set, it means the number is *not* prime.
-        // We use this negated definition instead of saying "a set bit means prime" to avoid
-        // having to initialize the whole BitSet with true values.
-        int sieveLength = ceiling - 1;
-        BitSet sieve = new BitSet(sieveLength);
-
-        // We use 'long' in these for loops to guard against integer overflow.
-        // However, because ceiling is a positive int, it is safe to cast back
-        // to an int inside the loop.
-        for (long n = 2; n * n < ceiling; n++) {
-            if (isPrime((int) n, sieve)) {
-                for (long j = n * n; j <= ceiling; j += n) {
-                    sieve.set((int) j - 2);
-                }
-            }
-        }
-
-        ImmutableList.Builder<Integer> results = ImmutableList.builder();
-        for (long n = 2; n <= ceiling; n++) {
-            int intN = (int) n;
-            if (isPrime(intN, sieve)) {
-                results.add(intN);
-            }
-        }
-
-        return results.build();
-    }
-
-    private static boolean isPrime(int n, BitSet sieve) {
-        return !sieve.get(n - 2);
     }
 
     @Override

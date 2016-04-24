@@ -20,8 +20,6 @@ public class PrimordialApplication extends Application<PrimordialConfiguration> 
 
     private static final String APPLICATION_NAME = "primordial";
 
-    private Injector injector;
-
     public static void main(String[] args) throws Exception {
         new PrimordialApplication().run(args);
     }
@@ -33,7 +31,6 @@ public class PrimordialApplication extends Application<PrimordialConfiguration> 
 
     @Override
     public void initialize(Bootstrap<PrimordialConfiguration> bootstrap) {
-        injector = Guice.createInjector(new PrimordialModule());
         bootstrap.addBundle(new AssetsBundle());
 
         final MetricRegistry metrics = new MetricRegistry();
@@ -41,9 +38,9 @@ public class PrimordialApplication extends Application<PrimordialConfiguration> 
         reporter.start();
     }
 
-
     @Override
     public void run(PrimordialConfiguration configuration, Environment environment) {
+        Injector injector = Guice.createInjector(new PrimordialModule(configuration));
         environment.healthChecks().register("default", new DefaultHealthCheck());
         environment.jersey().register(new PrimesResource(injector, configuration.getDefaultCalculator()));
     }

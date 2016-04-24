@@ -39,6 +39,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>1.10.69</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seanroy</groupId>
+            <artifactId>lambduh-maven-plugin</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
@@ -117,6 +132,11 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.github.seanroy</groupId>
+                    <artifactId>lambduh-maven-plugin</artifactId>
+                    <version>1.1.0</version>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>2.6.1</version>
@@ -175,19 +195,20 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
-                        <id>enforce</id>
-                        <configuration>
-                            <rules>
-                                <DependencyConvergence />
-                            </rules>
-                        </configuration>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>enforce</goal>
+                            <goal>read-project-properties</goal>
                         </goals>
+                        <configuration>
+                            <files>
+                                <file>aws.properties</file>
+                            </files>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -241,6 +262,30 @@
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.seanroy</groupId>
+                <artifactId>lambduh-maven-plugin</artifactId>
+                <!-- These AWS properties are defined in aws.properties and read by the properties-maven-plugin -->
+                <configuration>
+                    <region>${aws.region}</region>
+                    <functionName>${aws.function.name}</functionName>
+                    <functionCode>${project.build.directory}/${project.build.finalName}.${project.packaging}</functionCode>
+                    <description>${aws.function.description}</description>
+                    <lambdaRoleArn>${aws.role.arn}</lambdaRoleArn>
+                    <handler>${aws.handler}</handler>
+                    <s3Bucket>${aws.s3.bucket}</s3Bucket>
+                    <timeout>${aws.timeout}</timeout>
+                    <memorySize>${aws.memory.size}</memorySize>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>deploy-lambda</goal>
                         </goals>
                     </execution>
                 </executions>

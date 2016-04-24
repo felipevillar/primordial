@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.villarsolutions.primordial.api.CalculationResult;
 import com.villarsolutions.primordial.calculator.PrimeCalculator;
+import com.villarsolutions.primordial.calculator.impl.Segment;
 import io.dropwizard.jackson.Jackson;
 
 import java.io.IOException;
@@ -48,6 +49,10 @@ public class PrimordialFixtures {
         } catch (InstantiationException | IllegalAccessException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    public static Segment newSegment(long lowerBound, int segmentSize) {
+        return Segment.create(lowerBound, segmentSize);
     }
 
 }
