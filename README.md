@@ -89,9 +89,9 @@ For this to work, the following is required:
   * A valid AWS Lambda account. [AWS Account Setup Instructions](http://docs.aws.amazon.com/lambda/latest/dg/setup.html)
   * A valid credentials file: `~/.aws/credentials` (in Windows: `C:\Users\${user.name}\.aws\credentials`)  
   * Specify the following properties in `aws.properties`
-    * aws.region
-    * aws.role.arn
-    * aws.s3.bucket
+    * `aws.region`
+    * `aws.role.arn`
+    * `aws.s3.bucket`
 
 Once you have an AWS Lambda account, you can create credentials files, create users and manage roles by using the [IAM Management Console](https://console.aws.amazon.com/iam/home)
 
