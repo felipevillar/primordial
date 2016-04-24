@@ -93,11 +93,22 @@ For this to work, the following is required:
     * `aws.role.arn`
     * `aws.s3.bucket`
 
-Once you have an AWS Lambda account, you can create credentials files, create users and manage roles by using the [IAM Management Console](https://console.aws.amazon.com/iam/home)
+The content of the credentials file should look like this (note: these are invalid/example credentials):
 
-In order to deploy the lambda your user must have access to S3.  You can grant the `AmazonS3FullAccess` privilege via the IAM Management Console.
+        [default]
+        aws_access_key_id=AKIAIOSFODNN7EXAMPLE
+        aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
-You can see metrics and monitor the execution of lambdas via the [AWS Management Console](https://us-west-2.console.aws.amazon.com/console/home)
+Alternatively you can specify credentials via Environment Variables.  For more information on credentials, see this section of the AWS Lambda Documentation: [Configuration and Credential Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+
+Once you have an AWS Lambda account, you can create users, credentials, and manage roles by using the [IAM Management Console](https://console.aws.amazon.com/iam/home)
+
+In order to deploy and run the lambda your user must have full access to S3 and Lambda. You can attach these policies via the IAM Management Console:
+
+        AWSLambdaFullAccess
+        AmazonS3FullAccess
+
+Finally, you can see metrics and monitor the execution of lambdas via the [AWS Management Console](https://us-west-2.console.aws.amazon.com/console/home)
 
 To see the logs of the lambda executions, you can use [Amazon CloudWatch](https://eu-west-1.console.aws.amazon.com/cloudwatch/home)
 
