@@ -1,4 +1,4 @@
-package com.villarsolutions.primordial.calculator.impl.lambda;
+package com.villarsolutions.primordial.calculator.impl.aws;
 
 import com.villarsolutions.primordial.calculator.impl.Segment;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.List;
 
 /**
- * Request POJO to contain the parameters needed for the SegmentedSieveLambda.calculatePrimesInSegment
+ * Request POJO to contain the parameters needed for the {@link LambdaPrimeSieve#calculatePrimesInSegment(SieveSegmentRequest)}
  * function.
  * <p>
  * This class is serialized by the AWSLambdaClient and deserialised in the AWS Lambda compute grid.

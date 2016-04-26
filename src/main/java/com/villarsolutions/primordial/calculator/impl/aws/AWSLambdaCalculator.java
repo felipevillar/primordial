@@ -7,7 +7,6 @@ import com.google.common.base.Stopwatch;
 import com.villarsolutions.primordial.calculator.impl.AbstractSegmentedSieveCalculator;
 import com.villarsolutions.primordial.calculator.impl.ParallelEratosthenesSieve;
 import com.villarsolutions.primordial.calculator.impl.Segment;
-import com.villarsolutions.primordial.calculator.impl.lambda.SieveSegmentRequest;
 import com.villarsolutions.primordial.exception.CalculationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

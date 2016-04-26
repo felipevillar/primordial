@@ -1,7 +1,6 @@
 package com.villarsolutions.primordial.calculator.impl;
 
 import com.google.common.base.Stopwatch;
-import com.villarsolutions.primordial.calculator.impl.lambda.SieveSegmentRequest;
 import com.villarsolutions.primordial.exception.CalculationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static com.villarsolutions.primordial.calculator.impl.lambda.SegmentedSieveLambda.calculatePrimesInSegment;
+import static com.villarsolutions.primordial.calculator.impl.SegmentedSieveUtil.calculatePrimesInSegment;
+
 
 /**
  * Implementation of a segmented Eratosthenes Sieve which uses a fixed thread-pool executor and
@@ -63,7 +63,7 @@ public class ParallelEratosthenesSieve extends AbstractSegmentedSieveCalculator 
         ExecutorService executorService = Executors.newFixedThreadPool(getLevelOfParallelism());
         List<Future<List<Long>>> futures = segments.stream()
             .skip(1)
-            .map(segment -> executorService.submit(() -> calculatePrimesInSegment(SieveSegmentRequest.create(smallPrimes, segment))))
+            .map(segment -> executorService.submit(() -> calculatePrimesInSegment(smallPrimes, segment)))
             .collect(Collectors.toList());
 
         List<Long> result = concatenate(smallPrimes, futures);

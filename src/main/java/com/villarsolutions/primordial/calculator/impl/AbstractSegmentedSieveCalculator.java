@@ -36,14 +36,6 @@ public abstract class AbstractSegmentedSieveCalculator extends AbstractSieveCalc
         this.parallelismLowerBound = parallelismLowerBound;
     }
 
-    protected int getMinSegmentSize() {
-        return minSegmentSize;
-    }
-
-    protected int getMaxSegmentSize() {
-        return maxSegmentSize;
-    }
-
     protected int getLevelOfParallelism() {
         return levelOfParallelism;
     }
@@ -53,7 +45,7 @@ public abstract class AbstractSegmentedSieveCalculator extends AbstractSieveCalc
     }
 
     protected List<Segment> getSegments(long ceiling) {
-        return divideIntoSegments(ceiling, getMinSegmentSize(), getMaxSegmentSize(), getLevelOfParallelism(), getParallelismLowerBound());
+        return divideIntoSegments(ceiling, minSegmentSize, maxSegmentSize, getLevelOfParallelism(), getParallelismLowerBound());
     }
 
     /**
@@ -177,7 +169,7 @@ public abstract class AbstractSegmentedSieveCalculator extends AbstractSieveCalc
         return smallPrimes;
     }
 
-    protected List<Long> getPrimesFromFuture(Future<List<Long>> f) {
+    private List<Long> getPrimesFromFuture(Future<List<Long>> f) {
         try {
             return f.get();
         } catch (Exception e) {

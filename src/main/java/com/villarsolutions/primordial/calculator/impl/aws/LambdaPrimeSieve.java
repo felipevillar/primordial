@@ -2,7 +2,6 @@ package com.villarsolutions.primordial.calculator.impl.aws;
 
 import com.amazonaws.services.lambda.AWSLambdaClient;
 import com.amazonaws.services.lambda.invoke.LambdaFunction;
-import com.villarsolutions.primordial.calculator.impl.lambda.SieveSegmentRequest;
 
 import java.util.List;
 

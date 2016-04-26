@@ -1,29 +1,16 @@
-package com.villarsolutions.primordial.calculator.impl.lambda;
+package com.villarsolutions.primordial.calculator.impl;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.villarsolutions.primordial.calculator.impl.ParallelEratosthenesSieve;
-import com.villarsolutions.primordial.calculator.impl.Segment;
-import com.villarsolutions.primordial.calculator.impl.aws.AWSLambdaCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.BitSet;
 import java.util.List;
 
-/**
- * Thread-safe / functional class with a method to return a all the prime numbers in a
- * given <code>Segment</code>. Used by both the ParallelEratosthenesSieve and the
- * AWSLambdaCalculator
- *
- * @see ParallelEratosthenesSieve
- * @see AWSLambdaCalculator
- */
-@ThreadSafe
-public class SegmentedSieveLambda {
+public class SegmentedSieveUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(SegmentedSieveLambda.class);
+    private static final Logger log = LoggerFactory.getLogger(SegmentedSieveUtil.class);
 
     /**
      * Return all the prime numbers in the given Segment by using the <code>smallPrimes</code>
@@ -32,11 +19,9 @@ public class SegmentedSieveLambda {
      * Defined as a static method so that we can invoke it from the ParallelEratosthenesSieve
      * as well as from an AWS Lambda.
      */
-    public static List<Long> calculatePrimesInSegment(SieveSegmentRequest request) {
-        log.info(String.format("About to process sieve request for segment: %s", request.getSegment()));
+    public static List<Long> calculatePrimesInSegment(List<Integer> smallPrimes, Segment segment) {
+        log.info(String.format("About to process sieve request for segment: %s", segment));
         Stopwatch stopwatch = Stopwatch.createStarted();
-        List<Integer> smallPrimes = request.getSmallPrimes();
-        Segment segment = request.getSegment();
 
         // false means the number is prime.  This is the same convention
         // that was used in the basic EratosthenesSieve
@@ -65,5 +50,4 @@ public class SegmentedSieveLambda {
         log.info(String.format("Found [%s] primes in segment of size [%s] in %s", primes.size(), segment.getSegmentSize(), stopwatch));
         return primes;
     }
-
 }
