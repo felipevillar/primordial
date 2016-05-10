@@ -88,7 +88,7 @@ For this to work, the following is required:
 
   * A valid AWS Lambda account. [AWS Account Setup Instructions](http://docs.aws.amazon.com/lambda/latest/dg/setup.html)
   * A valid credentials file: `~/.aws/credentials` (in Windows: `C:\Users\${user.name}\.aws\credentials`)  
-  * Specify the following properties in `aws.properties`
+  * Create a file called `aws.properties` in the same folder as the `pom.xml` by copying the contents of `sample-aws.properties`, assigning valid values to the following three properties:
     * `aws.region`
     * `aws.role.arn`
     * `aws.s3.bucket`
