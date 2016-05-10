@@ -32,7 +32,7 @@ public abstract class AbstractSieveCalculator extends AbstractPrimeCalculator {
         // We use 'long' in these for loops to guard against integer overflow.
         // However, because ceiling is a positive int, it is safe to cast back
         // to an int inside the loop.
-        for (long n = 2; n * n < ceiling; n++) {
+        for (long n = 2; n * n <= ceiling; n++) {
             if (isPrime((int) n, sieve)) {
                 for (long j = n * n; j <= ceiling; j += n) {
                     sieve.set((int) j - 2);

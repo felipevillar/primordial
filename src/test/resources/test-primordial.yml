@@ -19,3 +19,13 @@ server:
   adminConnectors:
     - type: http
       port: 0
+
+
+logging:
+  level: INFO
+
+  appenders:
+
+    - type: console
+      logFormat: "%-4level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
+      timeZone: Europe/London
